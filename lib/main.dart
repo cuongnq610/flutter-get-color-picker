@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'colorPicker.dart';
+import 'screens/sr_colorPicker.dart';
+import 'screens/sr_home.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,6 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/colorPicker',
+      routes: <String, WidgetBuilder>{
+        '/': (context) => HomePage(),
+        '/colorPicker': (context) => ColorPicker(),
+        // '/second': (context) => SecondHome(),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -27,7 +34,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      // home: ColorPicker(),
     );
   }
 }
@@ -51,7 +58,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -66,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: ColorPickerWidget(),
+      body: ColorPicker(),
       // body: Center(
       //   // Center is a layout widget. It takes a single child and positions it
       //   // in the middle of the parent.
