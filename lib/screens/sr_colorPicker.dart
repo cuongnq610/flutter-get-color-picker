@@ -9,7 +9,6 @@
 //
 //////////////////////////////
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -19,18 +18,25 @@ import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+// import util render
+import '../utils//renderPositions.dart';
+import '../utils/renderBoxPositions.dart';
+// improt model
+import '../models/pickedColor.dart';
 
-class ColorPicker extends StatefulWidget {
+class ColorPickerCustom extends StatefulWidget {
   @override
   _ColorPickerState createState() => _ColorPickerState();
 }
 
-class _ColorPickerState extends State<ColorPicker> {
+class _ColorPickerState extends State<ColorPickerCustom> {
   String imagePath = 'assets/images/test.jpg';
   String imagePathPicker = '';
   GlobalKey imageKey = GlobalKey();
   GlobalKey paintKey = GlobalKey();
   final picker = new ImagePicker();
+  List<PickedColor> listPositions = [];
   img.Image photo;
 
   // CHANGE THIS FLAG TO TEST BASIC IMAGE, AND SNAPSHOT.
@@ -48,7 +54,7 @@ class _ColorPickerState extends State<ColorPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final String title = useSnapshot ? "snapshot" : "basic";
+    // final String title = useSnapshot ? "snapshot" : "basic";
     return Scaffold(
         // appBar: AppBar(title: Text("Color picker $title")),
         body: StreamBuilder(
@@ -59,113 +65,60 @@ class _ColorPickerState extends State<ColorPicker> {
             return SafeArea(
               child: Stack(
                 children: <Widget>[
-                  RepaintBoundary(
-                    key: paintKey,
-                    child: GestureDetector(
-                      onPanDown: (details) {
-                        searchPixel(details.globalPosition);
-                      },
-                      onPanUpdate: (details) {
-                        searchPixel(details.globalPosition);
-                      },
-                      child: Center(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          // child: Image.asset(
-                          //   imagePath,
-                          //   key: imageKey,
-                          //   fit: BoxFit.fitWidth,
-                          // ),
-                          child: imagePathPicker != ''
-                              ? Image.file(
-                                  File(imagePathPicker),
-                                  key: imageKey,
-                                )
-                              : Image.asset(
-                                  imagePath,
-                                  key: imageKey,
-                                  fit: BoxFit.fitWidth,
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    top: 550,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                  SingleChildScrollView(
+                    child: Column(
                       children: [
-                        Container(
-                          // margin: EdgeInsets.all(70),
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: selectedColor,
-                            border: Border.all(width: 2.0, color: Colors.white),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
+                        RepaintBoundary(
+                          key: paintKey,
+                          child: GestureDetector(
+                            onPanDown: (details) {
+                              // searchPixel(details.globalPosition);
+                            },
+                            onPanUpdate: (details) {
+                              // searchPixel(details.globalPosition);
+                            },
+                            onTapUp: (details) {
+                              searchPixel(details.globalPosition);
+                            },
+                            child: Center(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: imagePathPicker != ''
+                                    ? Image.file(
+                                        File(imagePathPicker),
+                                        key: imageKey,
+                                      )
+                                    : Image.asset(
+                                        imagePath,
+                                        key: imageKey,
+                                        fit: BoxFit.fitWidth,
+                                      ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                        Container(
-                          // margin: EdgeInsets.all(70),
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: selectedColor,
-                            border: Border.all(width: 2.0, color: Colors.white),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          // margin: EdgeInsets.all(70),
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            color: selectedColor,
-                            border: Border.all(width: 2.0, color: Colors.white),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
+                        ColorPicker(
+                          pickerColor: selectedColor,
+                          onColorChanged: null,
+                          enableAlpha: false,
+                          displayThumbColor: false,
+                          showLabel: false,
+                          pickerAreaHeightPercent: 0.8,
                         ),
                       ],
                     ),
                   ),
+                  renderPositions(listPositions),
                   Positioned(
-                    child: Text(
-                      selectedColor.toString(),
-                      style: TextStyle(
-                          color: Colors.white, backgroundColor: Colors.black54),
+                    left: 20,
+                    top: MediaQuery.of(context).size.width,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        renderBoxPositions(listPositions),
+                      ],
                     ),
-                    left: 114,
-                    top: 95,
                   ),
-                  Text((imagePathPicker != ''
-                          ? imagePathPicker?.toString()
-                          : '') +
-                      ' - ' +
-                      (photo != null ? photo?.width?.toString() : '') +
-                      ' - ' +
-                      (photo != null ? photo?.height?.toString() : ''))
                 ],
               ),
             );
@@ -222,10 +175,11 @@ class _ColorPickerState extends State<ColorPicker> {
     print('picker file ' + pickedFile.path.toString());
     print('byte data ' + imageBytes.toString());
     // setImageBytes(imageBytes);
-    final photoImage = await img.decodeImage(imageBytes.buffer.asUint8List());
+    final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
 
     setState(() {
       if (pickedFile != null) {
+        listPositions = [];
         imagePathPicker = pickedFile.path;
         photo = photoImage;
       } else {
@@ -240,19 +194,31 @@ class _ColorPickerState extends State<ColorPicker> {
   void _calculatePixel(Offset globalPosition) {
     RenderBox box = imageKey.currentContext.findRenderObject();
     Offset localPosition = box.globalToLocal(globalPosition);
-
     double px = localPosition.dx;
     double py = localPosition.dy;
 
+    print({globalPosition.dx, globalPosition.dy});
+
     if (useSnapshot) {
-      double widgetScaleWidth = box?.size?.width / photo?.width;
-      double widgetScaleHeight = box?.size?.height / photo?.height;
+      double widgetScaleWidth = box.size.width / photo?.width;
+      double widgetScaleHeight = box.size.height / photo?.height;
       px = (px / widgetScaleWidth);
       py = (py / widgetScaleHeight);
     }
 
     int pixel32 = photo.getPixelSafe(px.toInt(), py.toInt());
+
     int hex = abgrToArgb(pixel32);
+
+    print(Color(hex));
+    if (listPositions.length < 8) {
+      listPositions.add(new PickedColor(
+          globalX: globalPosition.dx,
+          globalY: globalPosition.dy,
+          localX: px,
+          localY: py,
+          color: Color(hex)));
+    }
 
     _stateController.add(Color(hex));
   }
