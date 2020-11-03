@@ -19,18 +19,28 @@ import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
+import 'package:simple_color_picker/simple_color_picker.dart';
+// import util render
+import '../utils//renderPositions.dart';
+import '../utils/renderBoxPositions.dart';
+// improt model
+import '../models/pickedColor.dart';
 
-class ColorPicker extends StatefulWidget {
+class ColorPickerCustom extends StatefulWidget {
+  final String imagePath;
+  const ColorPickerCustom({Key key, this.imagePath});
   @override
   _ColorPickerState createState() => _ColorPickerState();
 }
 
-class _ColorPickerState extends State<ColorPicker> {
-  String imagePath = 'assets/images/default.png';
+class _ColorPickerState extends State<ColorPickerCustom> {
+  String imagePath = 'assets/images/test.jpg';
   String imagePathPicker = '';
   GlobalKey imageKey = GlobalKey();
   GlobalKey paintKey = GlobalKey();
+  bool showModal = false;
   final picker = new ImagePicker();
+  List<PickedColor> listPositions = [];
   img.Image photo;
 
   // CHANGE THIS FLAG TO TEST BASIC IMAGE, AND SNAPSHOT.
@@ -42,13 +52,16 @@ class _ColorPickerState extends State<ColorPicker> {
 
   @override
   void initState() {
+    setState(() {
+      imagePath = widget.imagePath;
+    });
     currentKey = useSnapshot ? paintKey : imageKey;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final String title = useSnapshot ? "snapshot" : "basic";
+    // final String title = useSnapshot ? "snapshot" : "basic";
     return Scaffold(
       // appBar: AppBar(title: Text("Color picker $title")),
       body: StreamBuilder(
@@ -59,112 +72,51 @@ class _ColorPickerState extends State<ColorPicker> {
           return SafeArea(
             child: Stack(
               children: <Widget>[
-                RepaintBoundary(
-                  key: paintKey,
-                  child: GestureDetector(
-                    onPanDown: (details) {
-                      searchPixel(details.globalPosition);
-                    },
-                    onPanUpdate: (details) {
-                      searchPixel(details.globalPosition);
-                    },
-                    child: Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        // child: Image.asset(
-                        //   imagePath,
-                        //   key: imageKey,
-                        //   fit: BoxFit.fitWidth,
-                        // ),
-                        child: imagePathPicker != ''
-                            ? Image.file(
-                                File(imagePathPicker),
-                                key: imageKey,
-                              )
-                            : Image.asset(
-                                imagePath,
-                                key: imageKey,
-                                fit: BoxFit.fitWidth,
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 20,
-                  top: 550,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                SingleChildScrollView(
+                  child: Column(
                     children: [
-                      Container(
-                        // margin: EdgeInsets.all(70),
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: selectedColor,
-                          border: Border.all(width: 2.0, color: Colors.white),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
+                      RepaintBoundary(
+                        key: paintKey,
+                        child: GestureDetector(
+                          onTapUp: (details) {
+                            searchPixel(details.globalPosition);
+                          },
+                          child: Center(
+                            child: Container(
+                              // width: MediaQuery.of(context).size.width,
+                              child: imagePathPicker != ''
+                                  ? Image.file(
+                                      File(imagePathPicker),
+                                      key: imageKey,
+                                    )
+                                  : Image.asset(
+                                      imagePath,
+                                      key: imageKey,
+                                      fit: BoxFit.fill,
+                                    ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                      Container(
-                        // margin: EdgeInsets.all(70),
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: selectedColor,
-                          border: Border.all(width: 2.0, color: Colors.white),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        // margin: EdgeInsets.all(70),
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.rectangle,
-                          color: selectedColor,
-                          border: Border.all(width: 2.0, color: Colors.white),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
+                      SimpleColorPicker(
+                        color: HSVColor.fromColor(selectedColor),
+                        onChanged: null,
                       ),
                     ],
                   ),
                 ),
+                renderPositions(listPositions),
                 Positioned(
-                  child: Text(
-                    selectedColor.toString(),
-                    style: TextStyle(
-                        color: Colors.white, backgroundColor: Colors.black54),
+                  left: 20,
+                  top: MediaQuery.of(context).size.height * 0.8,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      renderBoxPositions(
+                          listPositions, _handleClickPickedColor),
+                    ],
                   ),
-                  left: 114,
-                  top: 95,
                 ),
-                Text(
-                    (imagePathPicker != '' ? imagePathPicker?.toString() : '') +
-                        ' - ' +
-                        (photo != null ? photo?.width?.toString() : '') +
-                        ' - ' +
-                        (photo != null ? photo?.height?.toString() : ''))
               ],
             ),
           );
@@ -177,31 +129,18 @@ class _ColorPickerState extends State<ColorPicker> {
       //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
       //     children: [
       //       IconButton(
-      //           icon: Icon(
-      //             Icons.grid_on,
-      //             color: Colors.white,
-      //           ),
-      //           onPressed: null),
-      //       IconButton(
-      //           icon: Icon(Icons.tonality, color: Colors.white),
-      //           onPressed: null),
-      //       IconButton(
-      //           icon: Icon(Icons.coronavirus, color: Colors.white),
-      //           onPressed: null),
-      //       IconButton(
-      //           icon: Icon(Icons.camera_alt_outlined, color: Colors.white),
-      //           onPressed: null),
-      //       IconButton(
-      //           icon: Icon(Icons.photo, color: Colors.white),
-      //           onPressed: () {
-      //             getImage();
-      //           }),
-      //       IconButton(
-      //           icon: Icon(Icons.lightbulb_outline, color: Colors.white),
-      //           onPressed: null),
-      //       IconButton(
-      //           icon: Icon(Icons.ondemand_video_sharp, color: Colors.white),
-      //           onPressed: null),
+      //         icon: Icon(
+      //           Icons.grid_on,
+      //           color: Colors.white,
+      //         ),
+      //         // left: 114,
+      //         // top: 95,
+      //       ),
+      //       Text((imagePathPicker != '' ? imagePathPicker?.toString() : '') +
+      //           ' - ' +
+      //           (photo != null ? photo?.width?.toString() : '') +
+      //           ' - ' +
+      //           (photo != null ? photo?.height?.toString() : ''))
       //     ],
       //   ),
       // ),
@@ -222,10 +161,11 @@ class _ColorPickerState extends State<ColorPicker> {
     print('picker file ' + pickedFile.path.toString());
     print('byte data ' + imageBytes.toString());
     // setImageBytes(imageBytes);
-    final photoImage = await img.decodeImage(imageBytes.buffer.asUint8List());
+    final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
 
     setState(() {
       if (pickedFile != null) {
+        listPositions = [];
         imagePathPicker = pickedFile.path;
         photo = photoImage;
       } else {
@@ -237,22 +177,72 @@ class _ColorPickerState extends State<ColorPicker> {
   // based on useSnapshot=true ? paintKey : imageKey ;
   // this key is used in this example to keep the code shorter.
 
+  Future<void> _handleClickPickedColor(int hex) async {
+    final colorClick = '#' + hex.toRadixString(16).substring(2);
+    _stateController.add(Color(hex));
+    print({colorClick});
+    Map<String, dynamic> jsonHex =
+        await parseJsonFromAssets('assets/json/hex.json');
+    Map<String, dynamic> jsonHexRal =
+        await parseJsonFromAssets('assets/json/hexRal.json');
+    final hexValue = jsonHex[colorClick];
+    final hexRalValue = jsonHexRal[colorClick];
+    print({hexValue, hexRalValue});
+    showDialog(
+      context: this.context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("terra rosa"),
+          content: Container(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.2),
+            child: Column(
+              children: [
+                Text('Complimentary color: $hexValue'),
+                Text('tri complimentary: $hexRalValue'),
+                Text('Mix: $hexRalValue $hexValue'),
+                Text('Something like that'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
   void _calculatePixel(Offset globalPosition) {
     RenderBox box = imageKey.currentContext.findRenderObject();
     Offset localPosition = box.globalToLocal(globalPosition);
-
     double px = localPosition.dx;
     double py = localPosition.dy;
 
     if (useSnapshot) {
-      double widgetScaleWidth = box?.size?.width / photo?.width;
-      double widgetScaleHeight = box?.size?.height / photo?.height;
+      double widgetScaleWidth = box.size.width / photo?.width;
+      double widgetScaleHeight = box.size.height / photo?.height;
       px = (px / widgetScaleWidth);
       py = (py / widgetScaleHeight);
     }
 
     int pixel32 = photo.getPixelSafe(px.toInt(), py.toInt());
+
     int hex = abgrToArgb(pixel32);
+    print({Color(hex)});
+    if (listPositions.length < 8) {
+      listPositions.add(new PickedColor(
+          globalX: globalPosition.dx,
+          globalY: globalPosition.dy,
+          localX: px,
+          localY: py,
+          color: hex));
+    }
 
     _stateController.add(Color(hex));
   }
@@ -269,6 +259,12 @@ class _ColorPickerState extends State<ColorPicker> {
         await capture.toByteData(format: ui.ImageByteFormat.png);
     setImageBytes(imageBytes);
     capture.dispose();
+  }
+
+  Future<Map<String, dynamic>> parseJsonFromAssets(String assetsPath) async {
+    return rootBundle
+        .loadString(assetsPath)
+        .then((jsonStr) => jsonDecode(jsonStr));
   }
 
   void setImageBytes(ByteData imageBytes) {

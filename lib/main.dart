@@ -13,8 +13,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
-        '/': (context) => new HomePage(),
-        '/colorPicker': (context) => new ColorPicker(),
+        '/': (context) => HomePage(),
+        '/colorPicker': (context) => ColorPickerCustom(),
         // '/second': (context) => SecondHome(),
       },
       title: 'Flutter Demo',
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: ColorPicker(),
+      body: ColorPickerCustom(),
       // body: Center(
       //   // Center is a layout widget. It takes a single child and positions it
       //   // in the middle of the parent.
