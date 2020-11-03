@@ -8,6 +8,8 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+// import widget render filter color
+import '../utils/renderFilterColors.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -20,6 +22,23 @@ class _HomePageState extends State<HomePage> {
   GlobalKey imageKey = GlobalKey();
   final picker = new ImagePicker();
   img.Image photo;
+  bool onFilter = false;
+
+  List<Color> colorsFilter = [
+    Color.fromRGBO(225, 225, 226, 1),
+    Color.fromRGBO(198, 199, 201, 1),
+    Color.fromRGBO(171, 175, 175, 1),
+    Color.fromRGBO(146, 148, 150, 1),
+    Color.fromRGBO(0, 0, 0, 1),
+    // Colors.white24,
+    // Colors.black38,
+    // Colors.black45,
+    // Colors.black54,
+    // Colors.black87,
+    // Colors.black,
+  ];
+
+  Color filterColor = Color.fromRGBO(0, 0, 0, 1);
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +51,48 @@ class _HomePageState extends State<HomePage> {
               fit: BoxFit.cover,
             ),
           ),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: imagePathPicker != ''
-                ? Image.file(
-                    File(imagePathPicker),
-                    key: imageKey,
-                  )
-                : Text('No image selected.'),
+          child: Stack(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: imagePathPicker != ''
+                    ?
+                    // ColorFiltered(
+                    //     colorFilter:
+                    //         ColorFilter.mode(filterColor, BlendMode.color),
+                    //     // colorFilter: null,
+                    //     child: Image.file(
+                    //       File(imagePathPicker),
+                    //       key: imageKey,
+                    //       color: filterColor,
+                    //     ),
+                    //   )
+                    Image.file(
+                        File(imagePathPicker),
+                        key: imageKey,
+                        color: filterColor.withOpacity(0.5),
+                        colorBlendMode: BlendMode.hardLight,
+                      )
+                    : null,
+              ),
+              onFilter == true
+                  ? Positioned(
+                      left: 0,
+                      top: 30,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          renderFilterColors(
+                              colorsFilter,
+                              _handleFilterColor,
+                              MediaQuery.of(context).size.width /
+                                  colorsFilter.length)
+                        ],
+                      ),
+                    )
+                  : Container()
+            ],
           ),
         ),
         bottomNavigationBar: Container(
@@ -62,17 +114,16 @@ class _HomePageState extends State<HomePage> {
                     // color: _tabController.index == 0 ? redColor : Colors.grey,
                     height: 30,
                   ),
-                  onPressed: null),
-              // IconButton(
-              //     icon: Icon(Icons.coronavirus, color: Colors.white),
-              //     onPressed: null),
-              // IconButton(
-              //     icon: Icon(Icons.camera_alt_outlined, color: Colors.white),
-              //     onPressed: null),
+                  onPressed: () => {
+                        setState(
+                          () {
+                            onFilter = !onFilter;
+                          },
+                        )
+                      }),
               IconButton(
                 icon: Image.asset(
                   'assets/icons/ic_gallery.png',
-                  // color: _tabController.index == 0 ? redColor : Colors.grey,
                   height: 30,
                 ),
                 onPressed: () {
@@ -82,7 +133,6 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                   icon: Image.asset(
                     'assets/icons/ic_color_true.png',
-                    // color: _tabController.index == 0 ? redColor : Colors.grey,
                     height: 30,
                   ),
                   onPressed: () {
@@ -91,7 +141,6 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                   icon: Image.asset(
                     'assets/icons/ic_youtube.png',
-                    // color: _tabController.index == 0 ? redColor : Colors.grey,
                     height: 30,
                   ),
                   onPressed: null),
@@ -103,6 +152,15 @@ class _HomePageState extends State<HomePage> {
     // get image from gallery
   }
 
+  void _handleFilterColor(Color color) {
+    print({color});
+    setState(
+      () {
+        filterColor = color;
+      },
+    );
+  }
+
   Future getImage() async {
     try {
       final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -110,7 +168,7 @@ class _HomePageState extends State<HomePage> {
       print('picker file ' + pickedFile.path.toString());
       print('byte data ' + imageBytes.toString());
       // setImageBytes(imageBytes);
-      final photoImage = await img.decodeImage(imageBytes.buffer.asUint8List());
+      final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
       if (pickedFile != null) {
         setState(
           () {

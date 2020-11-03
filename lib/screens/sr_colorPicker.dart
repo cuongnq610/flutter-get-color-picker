@@ -61,9 +61,7 @@ class _ColorPickerState extends State<ColorPickerCustom> {
 
   @override
   Widget build(BuildContext context) {
-    // final String title = useSnapshot ? "snapshot" : "basic";
     return Scaffold(
-      // appBar: AppBar(title: Text("Color picker $title")),
       body: StreamBuilder(
         initialData: Colors.green[500],
         stream: _stateController.stream,
@@ -83,7 +81,6 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                           },
                           child: Center(
                             child: Container(
-                              // width: MediaQuery.of(context).size.width,
                               child: imagePathPicker != ''
                                   ? Image.file(
                                       File(imagePathPicker),
@@ -122,28 +119,6 @@ class _ColorPickerState extends State<ColorPickerCustom> {
           );
         },
       ),
-      // bottomNavigationBar: Container(
-      //   padding: EdgeInsets.all(16),
-      //   color: Colors.black,
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: [
-      //       IconButton(
-      //         icon: Icon(
-      //           Icons.grid_on,
-      //           color: Colors.white,
-      //         ),
-      //         // left: 114,
-      //         // top: 95,
-      //       ),
-      //       Text((imagePathPicker != '' ? imagePathPicker?.toString() : '') +
-      //           ' - ' +
-      //           (photo != null ? photo?.width?.toString() : '') +
-      //           ' - ' +
-      //           (photo != null ? photo?.height?.toString() : ''))
-      //     ],
-      //   ),
-      // ),
     );
   }
 
