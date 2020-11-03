@@ -48,6 +48,7 @@ flutter:
 
   assets: 
     - assets/images/
+    - assets/icons/
     - assets/test.jpg
     - assets/abc.jpg
 
