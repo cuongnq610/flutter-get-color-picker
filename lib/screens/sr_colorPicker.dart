@@ -9,6 +9,7 @@
 //
 //////////////////////////////
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -18,7 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:simple_color_picker/simple_color_picker.dart';
 // import util render
 import '../utils//renderPositions.dart';
 import '../utils/renderBoxPositions.dart';
@@ -35,6 +36,7 @@ class _ColorPickerState extends State<ColorPickerCustom> {
   String imagePathPicker = '';
   GlobalKey imageKey = GlobalKey();
   GlobalKey paintKey = GlobalKey();
+  bool showModal = false;
   final picker = new ImagePicker();
   List<PickedColor> listPositions = [];
   img.Image photo;
@@ -71,18 +73,12 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                         RepaintBoundary(
                           key: paintKey,
                           child: GestureDetector(
-                            onPanDown: (details) {
-                              // searchPixel(details.globalPosition);
-                            },
-                            onPanUpdate: (details) {
-                              // searchPixel(details.globalPosition);
-                            },
                             onTapUp: (details) {
                               searchPixel(details.globalPosition);
                             },
                             child: Center(
                               child: Container(
-                                width: MediaQuery.of(context).size.width,
+                                // width: MediaQuery.of(context).size.width,
                                 child: imagePathPicker != ''
                                     ? Image.file(
                                         File(imagePathPicker),
@@ -91,19 +87,15 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                                     : Image.asset(
                                         imagePath,
                                         key: imageKey,
-                                        fit: BoxFit.fitWidth,
+                                        fit: BoxFit.fill,
                                       ),
                               ),
                             ),
                           ),
                         ),
-                        ColorPicker(
-                          pickerColor: selectedColor,
-                          onColorChanged: null,
-                          enableAlpha: false,
-                          displayThumbColor: false,
-                          showLabel: false,
-                          pickerAreaHeightPercent: 0.8,
+                        SimpleColorPicker(
+                          color: HSVColor.fromColor(selectedColor),
+                          onChanged: null,
                         ),
                       ],
                     ),
@@ -111,11 +103,12 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                   renderPositions(listPositions),
                   Positioned(
                     left: 20,
-                    top: MediaQuery.of(context).size.width,
+                    top: MediaQuery.of(context).size.height * 0.8,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        renderBoxPositions(listPositions),
+                        renderBoxPositions(
+                            listPositions, _handleClickPickedColor),
                       ],
                     ),
                   ),
@@ -191,13 +184,51 @@ class _ColorPickerState extends State<ColorPickerCustom> {
   // based on useSnapshot=true ? paintKey : imageKey ;
   // this key is used in this example to keep the code shorter.
 
+  Future<void> _handleClickPickedColor(int hex) async {
+    final colorClick = '#' + hex.toRadixString(16).substring(2);
+    _stateController.add(Color(hex));
+    print({colorClick});
+    Map<String, dynamic> jsonHex =
+        await parseJsonFromAssets('assets/json/hex.json');
+    Map<String, dynamic> jsonHexRal =
+        await parseJsonFromAssets('assets/json/hexRal.json');
+    final hexValue = jsonHex[colorClick];
+    final hexRalValue = jsonHexRal[colorClick];
+    print({hexValue, hexRalValue});
+    showDialog(
+      context: this.context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("terra rosa"),
+          content: Container(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.2),
+            child: Column(
+              children: [
+                Text('Complimentary color: $hexValue'),
+                Text('tri complimentary: $hexRalValue'),
+                Text('Mix: $hexRalValue $hexValue'),
+                Text('Something like that'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
   void _calculatePixel(Offset globalPosition) {
     RenderBox box = imageKey.currentContext.findRenderObject();
     Offset localPosition = box.globalToLocal(globalPosition);
     double px = localPosition.dx;
     double py = localPosition.dy;
-
-    print({globalPosition.dx, globalPosition.dy});
 
     if (useSnapshot) {
       double widgetScaleWidth = box.size.width / photo?.width;
@@ -209,15 +240,14 @@ class _ColorPickerState extends State<ColorPickerCustom> {
     int pixel32 = photo.getPixelSafe(px.toInt(), py.toInt());
 
     int hex = abgrToArgb(pixel32);
-
-    print(Color(hex));
+    print({Color(hex)});
     if (listPositions.length < 8) {
       listPositions.add(new PickedColor(
           globalX: globalPosition.dx,
           globalY: globalPosition.dy,
           localX: px,
           localY: py,
-          color: Color(hex)));
+          color: hex));
     }
 
     _stateController.add(Color(hex));
@@ -235,6 +265,12 @@ class _ColorPickerState extends State<ColorPickerCustom> {
         await capture.toByteData(format: ui.ImageByteFormat.png);
     setImageBytes(imageBytes);
     capture.dispose();
+  }
+
+  Future<Map<String, dynamic>> parseJsonFromAssets(String assetsPath) async {
+    return rootBundle
+        .loadString(assetsPath)
+        .then((jsonStr) => jsonDecode(jsonStr));
   }
 
   void setImageBytes(ByteData imageBytes) {

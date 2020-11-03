@@ -5,7 +5,7 @@ class PickedColor {
   double globalY;
   double localX;
   double localY;
-  Color color;
+  int color;
 
   PickedColor({this.globalX, this.globalY, this.localX, this.localY, this.color});
 }
