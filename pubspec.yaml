@@ -49,6 +49,7 @@ flutter:
 
   assets: 
     - assets/images/
+    - assets/icons/
     - assets/json/
     - assets/test.jpg
     - assets/abc.jpg

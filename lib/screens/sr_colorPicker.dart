@@ -27,6 +27,8 @@ import '../utils/renderBoxPositions.dart';
 import '../models/pickedColor.dart';
 
 class ColorPickerCustom extends StatefulWidget {
+  final String imagePath;
+  const ColorPickerCustom({Key key, this.imagePath});
   @override
   _ColorPickerState createState() => _ColorPickerState();
 }
@@ -50,6 +52,9 @@ class _ColorPickerState extends State<ColorPickerCustom> {
 
   @override
   void initState() {
+    setState(() {
+      imagePath = widget.imagePath;
+    });
     currentKey = useSnapshot ? paintKey : imageKey;
     super.initState();
   }
@@ -58,94 +63,88 @@ class _ColorPickerState extends State<ColorPickerCustom> {
   Widget build(BuildContext context) {
     // final String title = useSnapshot ? "snapshot" : "basic";
     return Scaffold(
-        // appBar: AppBar(title: Text("Color picker $title")),
-        body: StreamBuilder(
-          initialData: Colors.green[500],
-          stream: _stateController.stream,
-          builder: (buildContext, snapshot) {
-            Color selectedColor = snapshot.data ?? Colors.green;
-            return SafeArea(
-              child: Stack(
-                children: <Widget>[
-                  SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        RepaintBoundary(
-                          key: paintKey,
-                          child: GestureDetector(
-                            onTapUp: (details) {
-                              searchPixel(details.globalPosition);
-                            },
-                            child: Center(
-                              child: Container(
-                                // width: MediaQuery.of(context).size.width,
-                                child: imagePathPicker != ''
-                                    ? Image.file(
-                                        File(imagePathPicker),
-                                        key: imageKey,
-                                      )
-                                    : Image.asset(
-                                        imagePath,
-                                        key: imageKey,
-                                        fit: BoxFit.fill,
-                                      ),
-                              ),
+      // appBar: AppBar(title: Text("Color picker $title")),
+      body: StreamBuilder(
+        initialData: Colors.green[500],
+        stream: _stateController.stream,
+        builder: (buildContext, snapshot) {
+          Color selectedColor = snapshot.data ?? Colors.green;
+          return SafeArea(
+            child: Stack(
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      RepaintBoundary(
+                        key: paintKey,
+                        child: GestureDetector(
+                          onTapUp: (details) {
+                            searchPixel(details.globalPosition);
+                          },
+                          child: Center(
+                            child: Container(
+                              // width: MediaQuery.of(context).size.width,
+                              child: imagePathPicker != ''
+                                  ? Image.file(
+                                      File(imagePathPicker),
+                                      key: imageKey,
+                                    )
+                                  : Image.asset(
+                                      imagePath,
+                                      key: imageKey,
+                                      fit: BoxFit.fill,
+                                    ),
                             ),
                           ),
                         ),
-                        SimpleColorPicker(
-                          color: HSVColor.fromColor(selectedColor),
-                          onChanged: null,
-                        ),
-                      ],
-                    ),
+                      ),
+                      SimpleColorPicker(
+                        color: HSVColor.fromColor(selectedColor),
+                        onChanged: null,
+                      ),
+                    ],
                   ),
-                  renderPositions(listPositions),
-                  Positioned(
-                    left: 20,
-                    top: MediaQuery.of(context).size.height * 0.8,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        renderBoxPositions(
-                            listPositions, _handleClickPickedColor),
-                      ],
-                    ),
+                ),
+                renderPositions(listPositions),
+                Positioned(
+                  left: 20,
+                  top: MediaQuery.of(context).size.height * 0.8,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      renderBoxPositions(
+                          listPositions, _handleClickPickedColor),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
-        bottomNavigationBar: Container(
-          padding: EdgeInsets.all(16),
-          color: Colors.black,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                  icon: Icon(
-                    Icons.grid_on,
-                    color: Colors.white,
-                  ),
-                  onPressed: null),
-              IconButton(
-                  icon: Icon(Icons.tonality, color: Colors.white),
-                  onPressed: null),
-              IconButton(
-                  icon: Icon(Icons.coronavirus, color: Colors.white),
-                  onPressed: null),
-              IconButton(
-                  icon: Icon(Icons.photo, color: Colors.white),
-                  onPressed: () {
-                    getImage();
-                  }),
-              IconButton(
-                  icon: Icon(Icons.ondemand_video_sharp, color: Colors.white),
-                  onPressed: null),
-            ],
-          ),
-        ));
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      // bottomNavigationBar: Container(
+      //   padding: EdgeInsets.all(16),
+      //   color: Colors.black,
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       IconButton(
+      //         icon: Icon(
+      //           Icons.grid_on,
+      //           color: Colors.white,
+      //         ),
+      //         // left: 114,
+      //         // top: 95,
+      //       ),
+      //       Text((imagePathPicker != '' ? imagePathPicker?.toString() : '') +
+      //           ' - ' +
+      //           (photo != null ? photo?.width?.toString() : '') +
+      //           ' - ' +
+      //           (photo != null ? photo?.height?.toString() : ''))
+      //     ],
+      //   ),
+      // ),
+    );
   }
 
   void searchPixel(Offset globalPosition) async {
@@ -195,7 +194,8 @@ class _ColorPickerState extends State<ColorPickerCustom> {
         return AlertDialog(
           title: new Text("terra rosa"),
           content: Container(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.2),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.2),
             child: Column(
               children: [
                 Text('Complimentary color: $hexValue'),

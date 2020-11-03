@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/colorPicker',
+      initialRoute: '/',
       routes: <String, WidgetBuilder>{
         '/': (context) => HomePage(),
         '/colorPicker': (context) => ColorPickerCustom(),
