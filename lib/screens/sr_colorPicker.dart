@@ -136,16 +136,10 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                   icon: Icon(Icons.coronavirus, color: Colors.white),
                   onPressed: null),
               IconButton(
-                  icon: Icon(Icons.camera_alt_outlined, color: Colors.white),
-                  onPressed: null),
-              IconButton(
                   icon: Icon(Icons.photo, color: Colors.white),
                   onPressed: () {
                     getImage();
                   }),
-              IconButton(
-                  icon: Icon(Icons.lightbulb_outline, color: Colors.white),
-                  onPressed: null),
               IconButton(
                   icon: Icon(Icons.ondemand_video_sharp, color: Colors.white),
                   onPressed: null),
@@ -248,9 +242,8 @@ class _ColorPickerState extends State<ColorPickerCustom> {
           localX: px,
           localY: py,
           color: hex));
+      _stateController.add(Color(hex));
     }
-
-    _stateController.add(Color(hex));
   }
 
   Future<void> loadImageBundleBytes() async {
