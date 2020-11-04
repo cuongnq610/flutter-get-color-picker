@@ -81,28 +81,31 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                 Column(
                   children: [
                     RepaintBoundary(
-                      key: paintKey,
-                      child: GestureDetector(
-                        onTapUp: (details) {
-                          searchPixel(details.globalPosition);
-                        },
-                        child: Center(
-                          child: Container(
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: imagePathPicker != ''
-                                ? Image.file(
-                                    File(imagePathPicker),
-                                    key: imageKey,
-                                  )
-                                : Image.asset(
-                                    imagePath,
-                                    key: imageKey,
-                                    fit: BoxFit.fill,
-                                  ),
+                        key: paintKey,
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          child: GestureDetector(
+                            onTapUp: (details) {
+                              searchPixel(details.globalPosition);
+                            },
+                            child: Center(
+                              child: Container(
+                                // height: MediaQuery.of(context).size.height * 0.5,
+                                margin: EdgeInsets.only(top: 30),
+                                child: imagePathPicker != ''
+                                    ? Image.file(
+                                        File(imagePathPicker),
+                                        key: imageKey,
+                                      )
+                                    : Image.asset(
+                                        imagePath,
+                                        key: imageKey,
+                                        fit: BoxFit.fill,
+                                      ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
+                        )),
                     Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height * 0.45,
@@ -180,23 +183,27 @@ class _ColorPickerState extends State<ColorPickerCustom> {
       context: this.context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: new Text("terra rosa", style: TextStyle(color: Colors.white)),
+          title: Text(hexRalValue != null ? '$hexRalValue' : '',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: Color.fromRGBO(51, 51, 51, 1),
           content: Container(
             constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.2),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Complimentary color: $colorClick', style: TextStyle(color: Colors.white)),
-                Text('tri complimentary: $hexRalValue', style: TextStyle(color: Colors.white)),
-                Text('Mix: $colorClick $hexValue', style: TextStyle(color: Colors.white)),
-                Text('Something like that', style: TextStyle(color: Colors.white)),
+                Text('Complimentary color: $colorClick',
+                    style: TextStyle(color: Colors.white)),
+                Text(hexRalValue != null ? 'tri complimentary: $hexRalValue' : '',
+                    style: TextStyle(color: Colors.white)),
+                Text(hexRalValue != null ? 'Mix: $colorClick $hexValue' : '',
+                    style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
           actions: <Widget>[
-            new FlatButton(
-              child: new Text("Close", style: TextStyle(color: Colors.red)),
+            FlatButton(
+              child: Text("Close", style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.pop(context, true);
                 // _removeColorPicked(hex);
@@ -281,15 +288,15 @@ int abgrToArgb(int argbColor) {
 }
 
 Future<Uint8List> _readFileByte(String filePath) async {
-    Uri myUri = Uri.parse(filePath);
-    File audioFile = new File.fromUri(myUri);
-    Uint8List bytes;
-    await audioFile.readAsBytes().then((value) {
-    bytes = Uint8List.fromList(value); 
+  Uri myUri = Uri.parse(filePath);
+  File audioFile = new File.fromUri(myUri);
+  Uint8List bytes;
+  await audioFile.readAsBytes().then((value) {
+    bytes = Uint8List.fromList(value);
     print('reading of bytes is completed');
   }).catchError((onError) {
-      print('Exception Error while reading audio from path:' +
-      onError.toString());
+    print(
+        'Exception Error while reading audio from path:' + onError.toString());
   });
   return bytes;
 }
