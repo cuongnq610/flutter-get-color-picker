@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 // import widget render filter color
 import '../utils/renderFilterColors.dart';
 // import widget render grid
@@ -26,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   img.Image photo;
   bool onFilter = false;
   bool onGrid = false;
+  String urls = '';
 
   List<dynamic> colorsFilter = [
     {
@@ -61,6 +65,24 @@ class _HomePageState extends State<HomePage> {
       "color": Color.fromRGBO(225, 225, 226, 1),
   };
   double levelFilterColor = 0;
+
+  Future<void> getdata() async {
+    var response = await http.get('https://bible-friend-288110.ew.r.appspot.com/api/v1/get-color-app');
+    if (response.statusCode == 200) {
+      var res = json.decode(response.body);
+      print({res['data']['url_youtube']});
+      urls = res['data']['url_youtube'];
+    } else {
+      throw Exception('Failed to load album');
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getdata();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +201,9 @@ class _HomePageState extends State<HomePage> {
                     'assets/icons/ic_youtube.png',
                     height: 30,
                   ),
-                  onPressed: null),
+                  onPressed: () {
+                    _launchUrl();
+                  }),
             ],
           ),
         ),
@@ -195,6 +219,14 @@ class _HomePageState extends State<HomePage> {
         levelFilterColor = level * 1/colorsFilter.length;
       },
     );
+  }
+
+  void _launchUrl() async {
+    if (await canLaunch(urls)) {
+      await launch(urls);
+    } else {
+      throw 'Could not open Url';
+    }
   }
 
   Future getImage() async {
