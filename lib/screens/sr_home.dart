@@ -26,7 +26,8 @@ class _HomePageState extends State<HomePage> {
   String imagePathPicker = '';
   GlobalKey imageKey = GlobalKey();
   final picker = new ImagePicker();
-  img.Image photo;
+  // img.Image photo;
+  Image photo;
   bool onFilter = false;
   bool onGrid = false;
   String urls = '';
@@ -232,16 +233,19 @@ class _HomePageState extends State<HomePage> {
   Future getImage() async {
     try {
       final pickedFile = await picker.getImage(source: ImageSource.gallery);
-      ByteData imageBytes = await rootBundle.load(pickedFile.path);
-      print('picker file ' + pickedFile.path.toString());
-      print('byte data ' + imageBytes.toString());
-      // setImageBytes(imageBytes);
-      final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
+      // ByteData imageBytes = await rootBundle.load(pickedFile.path);
+      // final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
+
+      final photoImage = Image.file(File(pickedFile.path));
+      
+      // final photoImage = Image.file(File(pickedFile.path));
+      
       if (pickedFile != null) {
         setState(
           () {
             imagePathPicker = pickedFile.path;
             photo = photoImage;
+            levelFilterColor = 0;
           },
         );
       } else {

@@ -147,7 +147,7 @@ class _ColorPickerState extends State<ColorPickerCustom> {
   Future getImage(pathImage) async {
     // final pickedFile = await picker.getImage(source: ImageSource.gallery);
     // ByteData imageBytes = await rootBundle.load(pickedFile.path);
-    ByteData imageBytes = await rootBundle.load(pathImage);
+    final imageBytes = await _readFileByte(pathImage);
     // setImageBytes(imageBytes);
     final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
 
@@ -278,4 +278,18 @@ int abgrToArgb(int argbColor) {
   int r = (argbColor >> 16) & 0xFF;
   int b = argbColor & 0xFF;
   return (argbColor & 0xFF00FF00) | (b << 16) | r;
+}
+
+Future<Uint8List> _readFileByte(String filePath) async {
+    Uri myUri = Uri.parse(filePath);
+    File audioFile = new File.fromUri(myUri);
+    Uint8List bytes;
+    await audioFile.readAsBytes().then((value) {
+    bytes = Uint8List.fromList(value); 
+    print('reading of bytes is completed');
+  }).catchError((onError) {
+      print('Exception Error while reading audio from path:' +
+      onError.toString());
+  });
+  return bytes;
 }
