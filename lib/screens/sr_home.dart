@@ -86,7 +86,8 @@ class _HomePageState extends State<HomePage> {
                     height: 30,
                   ),
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/colorPicker');
+                    Navigator.of(context).pushNamed('/colorPicker',
+                        arguments: {"imagePath": imagePathPicker});
                   }),
               IconButton(
                   icon: Image.asset(

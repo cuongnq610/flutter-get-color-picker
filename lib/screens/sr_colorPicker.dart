@@ -52,17 +52,23 @@ class _ColorPickerState extends State<ColorPickerCustom> {
 
   @override
   void initState() {
-    setState(() {
-      imagePath = widget.imagePath;
-    });
     currentKey = useSnapshot ? paintKey : imageKey;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Map args = ModalRoute.of(context).settings.arguments as Map;
+    if (args != null && imagePath != args['imagePath']) {
+      setState(() {
+        imagePath = args['imagePath'];
+      });
+      getImage(args['imagePath']);
+    }
+
     // final String title = useSnapshot ? "snapshot" : "basic";
     return Scaffold(
+      // backgroundColor: Color(),
       // appBar: AppBar(title: Text("Color picker $title")),
       body: StreamBuilder(
         initialData: Colors.green[500],
@@ -72,51 +78,56 @@ class _ColorPickerState extends State<ColorPickerCustom> {
           return SafeArea(
             child: Stack(
               children: <Widget>[
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      RepaintBoundary(
-                        key: paintKey,
-                        child: GestureDetector(
-                          onTapUp: (details) {
-                            searchPixel(details.globalPosition);
-                          },
-                          child: Center(
-                            child: Container(
-                              // width: MediaQuery.of(context).size.width,
-                              child: imagePathPicker != ''
-                                  ? Image.file(
-                                      File(imagePathPicker),
-                                      key: imageKey,
-                                    )
-                                  : Image.asset(
-                                      imagePath,
-                                      key: imageKey,
-                                      fit: BoxFit.fill,
-                                    ),
-                            ),
+                Column(
+                  children: [
+                    RepaintBoundary(
+                      key: paintKey,
+                      child: GestureDetector(
+                        onTapUp: (details) {
+                          searchPixel(details.globalPosition);
+                        },
+                        child: Center(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: imagePathPicker != ''
+                                ? Image.file(
+                                    File(imagePathPicker),
+                                    key: imageKey,
+                                  )
+                                : Image.asset(
+                                    imagePath,
+                                    key: imageKey,
+                                    fit: BoxFit.fill,
+                                  ),
                           ),
                         ),
                       ),
-                      SimpleColorPicker(
-                        color: HSVColor.fromColor(selectedColor),
-                        onChanged: null,
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.1,
+                            width: MediaQuery.of(context).size.width * 0.94,
+                            child: renderBoxPositions(
+                                listPositions, _handleClickPickedColor),
+                          ),
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.35,
+                            width: MediaQuery.of(context).size.width * 0.94,
+                            child: SimpleColorPicker(
+                              color: HSVColor.fromColor(selectedColor),
+                              onChanged: null,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 renderPositions(listPositions),
-                Positioned(
-                  left: 20,
-                  top: MediaQuery.of(context).size.height * 0.8,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      renderBoxPositions(
-                          listPositions, _handleClickPickedColor),
-                    ],
-                  ),
-                ),
               ],
             ),
           );
@@ -155,18 +166,17 @@ class _ColorPickerState extends State<ColorPickerCustom> {
   }
 
   // get image from gallery
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    ByteData imageBytes = await rootBundle.load(pickedFile.path);
-    print('picker file ' + pickedFile.path.toString());
-    print('byte data ' + imageBytes.toString());
+  Future getImage(pathImage) async {
+    // final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    // ByteData imageBytes = await rootBundle.load(pickedFile.path);
+    ByteData imageBytes = await rootBundle.load(pathImage);
     // setImageBytes(imageBytes);
     final photoImage = img.decodeImage(imageBytes.buffer.asUint8List());
 
     setState(() {
-      if (pickedFile != null) {
+      if (photoImage != null) {
         listPositions = [];
-        imagePathPicker = pickedFile.path;
+        imagePathPicker = pathImage;
         photo = photoImage;
       } else {
         print('No image selected.');
@@ -234,7 +244,7 @@ class _ColorPickerState extends State<ColorPickerCustom> {
     int pixel32 = photo.getPixelSafe(px.toInt(), py.toInt());
 
     int hex = abgrToArgb(pixel32);
-    print({Color(hex)});
+    print({px, py, localPosition});
     if (listPositions.length < 8) {
       listPositions.add(new PickedColor(
           globalX: globalPosition.dx,
