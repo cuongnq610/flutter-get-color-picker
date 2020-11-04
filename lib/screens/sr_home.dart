@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         bottomNavigationBar: Container(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(6),
           color: Colors.black,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -194,9 +194,9 @@ class _ColorPickerState extends State<ColorPickerCustom> {
               children: [
                 Text('Complimentary color: $colorClick',
                     style: TextStyle(color: Colors.white)),
-                Text(hexRalValue != null ? 'tri complimentary: $hexRalValue' : '',
+                Text(hexRalValue != null ? 'tri complimentary: $hexRalValue' : 'tri complimentary:',
                     style: TextStyle(color: Colors.white)),
-                Text(hexRalValue != null ? 'Mix: $colorClick $hexValue' : '',
+                Text(hexRalValue != null ? 'Mix: $colorClick $hexValue' : 'Mix:',
                     style: TextStyle(color: Colors.white)),
               ],
             ),
