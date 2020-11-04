@@ -59,6 +59,9 @@ class _HomePageState extends State<HomePage> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  color: filterColor
+                ),
                 child: imagePathPicker != ''
                     ?
                     // ColorFiltered(
@@ -74,8 +77,6 @@ class _HomePageState extends State<HomePage> {
                     Image.file(
                         File(imagePathPicker),
                         key: imageKey,
-                        // color: filterColor,
-                        // colorBlendMode: BlendMode.hardLight,
                       )
                     : null,
               ),

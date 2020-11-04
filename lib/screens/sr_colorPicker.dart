@@ -180,30 +180,38 @@ class _ColorPickerState extends State<ColorPickerCustom> {
       context: this.context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: new Text("terra rosa"),
+          title: new Text("terra rosa", style: TextStyle(color: Colors.white)),
+          backgroundColor: Color.fromRGBO(51, 51, 51, 1),
           content: Container(
             constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.2),
             child: Column(
               children: [
-                Text('Complimentary color: $hexValue'),
-                Text('tri complimentary: $hexRalValue'),
-                Text('Mix: $hexRalValue $hexValue'),
-                Text('Something like that'),
+                Text('Complimentary color: $colorClick', style: TextStyle(color: Colors.white)),
+                Text('tri complimentary: $hexRalValue', style: TextStyle(color: Colors.white)),
+                Text('Mix: $colorClick $hexValue', style: TextStyle(color: Colors.white)),
+                Text('Something like that', style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
           actions: <Widget>[
             new FlatButton(
-              child: new Text("Close"),
+              child: new Text("Remove", style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.pop(context, true);
+                _removeColorPicked(hex);
               },
             )
           ],
         );
       },
     );
+  }
+
+  void _removeColorPicked(int hex) {
+    setState(() {
+      listPositions.removeWhere((element) => element.color == hex);
+    });
   }
 
   void _calculatePixel(Offset globalPosition) {
