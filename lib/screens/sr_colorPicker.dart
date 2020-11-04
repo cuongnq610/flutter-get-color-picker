@@ -127,7 +127,7 @@ class _ColorPickerState extends State<ColorPickerCustom> {
                     ),
                   ],
                 ),
-                renderPositions(listPositions),
+                renderPositions(listPositions, _removeColorPicked),
               ],
             ),
           );
@@ -196,10 +196,10 @@ class _ColorPickerState extends State<ColorPickerCustom> {
           ),
           actions: <Widget>[
             new FlatButton(
-              child: new Text("Remove", style: TextStyle(color: Colors.red)),
+              child: new Text("Close", style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.pop(context, true);
-                _removeColorPicked(hex);
+                // _removeColorPicked(hex);
               },
             )
           ],
@@ -208,9 +208,10 @@ class _ColorPickerState extends State<ColorPickerCustom> {
     );
   }
 
-  void _removeColorPicked(int hex) {
+  void _removeColorPicked(int index) {
     setState(() {
-      listPositions.removeWhere((element) => element.color == hex);
+      // listPositions.removeWhere((element) => element.color == hex);
+      listPositions.removeAt(index);
     });
   }
 

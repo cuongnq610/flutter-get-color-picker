@@ -27,21 +27,40 @@ class _HomePageState extends State<HomePage> {
   bool onFilter = false;
   bool onGrid = false;
 
-  List<Color> colorsFilter = [
-    Color.fromRGBO(225, 225, 226, 1),
-    Color.fromRGBO(198, 199, 201, 1),
-    Color.fromRGBO(171, 175, 175, 1),
-    Color.fromRGBO(146, 148, 150, 1),
-    Color.fromRGBO(0, 0, 0, 1),
-    // Colors.white24,
-    // Colors.black38,
-    // Colors.black45,
-    // Colors.black54,
-    // Colors.black87,
-    // Colors.black,
+  List<dynamic> colorsFilter = [
+    {
+      "color": Color.fromRGBO(225, 225, 226, 1),
+    },
+    {
+      "color": Color.fromRGBO(198, 199, 201, 1),
+    },
+    {
+      "color": Color.fromRGBO(171, 175, 175, 1),
+    },
+    {
+      "color": Color.fromRGBO(146, 148, 150, 1),
+    },
+    {
+      "color": Color.fromRGBO(123, 124, 127, 1),
+    },
+    {
+      "color": Color.fromRGBO(99, 100, 102, 1),
+    },
+    {
+      "color": Color.fromRGBO(73, 73, 74, 1),
+    },
+    {
+      "color": Color.fromRGBO(73, 73, 74, 1),
+    },
+    {
+      "color": Color.fromRGBO(0, 0, 0, 1),
+    },
   ];
 
-  Color filterColor = Color.fromRGBO(0, 0, 0, 1);
+  dynamic filterColor = {
+      "color": Color.fromRGBO(225, 225, 226, 1),
+  };
+  double levelFilterColor = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -59,25 +78,26 @@ class _HomePageState extends State<HomePage> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  color: filterColor
-                ),
                 child: imagePathPicker != ''
                     ?
-                    // ColorFiltered(
-                    //     colorFilter:
-                    //         ColorFilter.mode(filterColor, BlendMode.color),
-                    //     // colorFilter: null,
-                    //     child: Image.file(
-                    //       File(imagePathPicker),
-                    //       key: imageKey,
-                    //       color: filterColor,
-                    //     ),
-                    //   )
-                    Image.file(
-                        File(imagePathPicker),
-                        key: imageKey,
+                    ColorFiltered(
+                        colorFilter: ColorFilter.matrix(
+                          [
+                            (0.2126 + 0.7874 * (1- levelFilterColor)), (0.7152 - 0.7152  * (1- levelFilterColor)), (0.0722 - 0.0722 * (1- levelFilterColor)), 0, 0,
+                            (0.2126 - 0.2126 * (1- levelFilterColor)), (0.7152 + 0.2848  * (1- levelFilterColor)), (0.0722 - 0.0722 * (1- levelFilterColor)), 0, 0,
+                            (0.2126 - 0.2126 * (1- levelFilterColor)), (0.7152 - 0.7152  * (1- levelFilterColor)), (0.0722 + 0.9278 * (1- levelFilterColor)), 0, 0,
+                              0,     0,     0,     1,     0,
+                          ]
+                        ),
+                        child: Image.file(
+                          File(imagePathPicker),
+                          key: imageKey,
+                        ),
                       )
+                    // Image.file(
+                    //     File(imagePathPicker),
+                    //     key: imageKey,
+                    //   )
                     : null,
               ),
               onFilter == true
@@ -168,11 +188,11 @@ class _HomePageState extends State<HomePage> {
     // get image from gallery
   }
 
-  void _handleFilterColor(Color color) {
-    print({color});
+  void _handleFilterColor(dynamic color, level) {
     setState(
       () {
         filterColor = color;
+        levelFilterColor = level * 1/colorsFilter.length;
       },
     );
   }
