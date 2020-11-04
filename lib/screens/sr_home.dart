@@ -10,6 +10,8 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 // import widget render filter color
 import '../utils/renderFilterColors.dart';
+// import widget render grid
+import '../utils//renderGrid.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   final picker = new ImagePicker();
   img.Image photo;
   bool onFilter = false;
+  bool onGrid = false;
 
   List<Color> colorsFilter = [
     Color.fromRGBO(225, 225, 226, 1),
@@ -71,8 +74,8 @@ class _HomePageState extends State<HomePage> {
                     Image.file(
                         File(imagePathPicker),
                         key: imageKey,
-                        color: filterColor.withOpacity(0.5),
-                        colorBlendMode: BlendMode.hardLight,
+                        // color: filterColor,
+                        // colorBlendMode: BlendMode.hardLight,
                       )
                     : null,
               ),
@@ -91,7 +94,10 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     )
-                  : Container()
+                  : Container(),
+              onGrid == true 
+                ? renderPositions(MediaQuery.of(context).size.height / 5)
+                : Container()
             ],
           ),
         ),
@@ -107,7 +113,14 @@ class _HomePageState extends State<HomePage> {
                     // color: _tabController.index == 0 ? redColor : Colors.grey,
                     height: 30,
                   ),
-                  onPressed: null),
+                  onPressed: () => {
+                        setState(
+                          () {
+                            onFilter = false;
+                            onGrid = !onGrid;
+                          },
+                        )
+                      }),
               IconButton(
                   icon: Image.asset(
                     'assets/icons/ic_value.png',
@@ -118,6 +131,7 @@ class _HomePageState extends State<HomePage> {
                         setState(
                           () {
                             onFilter = !onFilter;
+                            onGrid = false;
                           },
                         )
                       }),
